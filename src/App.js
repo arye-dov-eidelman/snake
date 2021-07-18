@@ -1,20 +1,21 @@
 import './App.css';
 import { useState, useEffect, useMemo } from 'react'
+import KeyboardEventHandler from 'react-keyboard-event-handler';
+
 
 const BOARD_WIDTH = 25;
 const BOARD_HEIGHT = 25;
-const TICK_INTERVAL_MS = 100;
+const TICK_INTERVAL_MS = 200;
 
-const LEFT_KEY = 37
-const UP_KEY = 38
-const RIGHT_KEY = 39
-const DOWN_KEY = 40
-
+const KEYBOARD_PROFILES = [
+  { left: 'left', up: 'up', right: 'right', down: 'down' },
+  { a: 'left', w: 'up', d: 'right', s: 'down' }
+]
 const VELOCITIES = {
-  [LEFT_KEY]: { x: -1, y: 0 },
-  [UP_KEY]: { x: 0, y: -1 },
-  [RIGHT_KEY]: { x: 1, y: 0 },
-  [DOWN_KEY]: { x: 0, y: 1 },
+  left: { x: -1, y: 0 },
+  up: { x: 0, y: -1 },
+  right: { x: 1, y: 0 },
+  down: { x: 0, y: 1 },
 }
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
     head: { x: 12, y: 12 },
     body: [{ x: 11, y: 12 }, { x: 10, y: 12 }, { x: 9, y: 12 }, { x: 8, y: 12 }],
     velocity: { x: 1, y: 0 },
+    keyboardProfile: KEYBOARD_PROFILES[0],
     alive: true
   })
 
@@ -47,12 +49,14 @@ function App() {
           },
           body: [snake.head, ...snake.body.slice(0, -1)]
         }
+
         // kill if crashed self
         for (const limb of nextSnake.body) {
           if (nextSnake.head.x === limb.x && nextSnake.head.y === limb.y) {
             return { ...snake, alive: false }
           }
         }
+
         // kill if crashed wall
         if (nextSnake.head.x < 0
           || nextSnake.head.x >= BOARD_WIDTH
@@ -68,21 +72,28 @@ function App() {
     return () => { clearInterval(interval) }
   }, [])
 
-  const handleKeyDown = e => {
-    const velocity = VELOCITIES[e.keyCode]
-    if (velocity) {
-      setSnake(snake => {
-        if (Math.abs((snake.head.x - snake.body[0].x) - velocity.x) > 1
-          || Math.abs((snake.head.y - snake.body[0].y) - velocity.y) > 1) {
-          return snake
-        }
-        return { ...snake, velocity }
-      })
-    }
+  const handleKeyDown = (key, e) => {
+    console.log(key, e);
+    setSnake(snake => {
+      const velocity = VELOCITIES[snake.keyboardProfile[key.split('+').pop()]]
+      if (!velocity
+        || Math.abs((snake.head.x - snake.body[0].x) - velocity.x) > 1
+        || Math.abs((snake.head.y - snake.body[0].y) - velocity.y) > 1) {
+        return snake
+      }
+      return { ...snake, velocity }
+    })
   }
 
   return (
-    <div className="App" onKeyDown={handleKeyDown} tabIndex="-1">
+    <div className="App">
+      <KeyboardEventHandler
+        handleKeys={
+          KEYBOARD_PROFILES.map(profile => Object.keys(profile)).flat()
+            .map(key => [key, 'ctrl+' + key, 'shift+' + key, 'meta+' + key, 'alt+' + key]).flat()
+        }
+        onKeyEvent={handleKeyDown}
+      />
       <header className="App-header">
         <h2 className="text-3xl bg-[#916a6a]">Snake</h2>
       </header>
