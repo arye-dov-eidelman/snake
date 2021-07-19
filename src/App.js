@@ -67,6 +67,7 @@ function App() {
         game={game}
         setGame={setGame}
         getRandomEmptyPosition={getRandomEmptyPosition}
+        restart={() => setGame(generateNewGame(game.options))}
       />}
     </div>
   )

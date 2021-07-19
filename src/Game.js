@@ -8,7 +8,7 @@ const VELOCITIES = {
   down: { x: 0, y: 1 },
 }
 
-function Game({ game, setGame, getRandomEmptyPosition }) {
+function Game({ game, setGame, getRandomEmptyPosition, restart }) {
   const board = useMemo(() => {
     const board = Array(game.board.height).fill().map(() => Array(game.board.width).fill({}))
     const { snake, foods } = game
@@ -89,9 +89,7 @@ function Game({ game, setGame, getRandomEmptyPosition }) {
       const { snake } = game
       // new game if over
       if (plainKey === 'enter') {
-        if (game.over) {
-          return { ...game.config, config: game.config }
-        }
+        if (game.over) { restart() }
         return game
       }
       // pause
