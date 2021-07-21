@@ -1,74 +1,114 @@
 import { useState } from 'react'
+import _ from 'lodash'
 import './App.css'
 import Game from './Game'
+import GameOptionsDialog from './GameOptionsDialog'
+window._ = _
 
-const KEYBOARD_PROFILES = [
-  { left: 'left', up: 'up', right: 'right', down: 'down' },
-  { a: 'left', w: 'up', d: 'right', s: 'down' }
+const INPUT_CONTROLS_PROFILES = [
+  { id: 'arrowKeys', keyMap: { left: 'left', up: 'up', right: 'right', down: 'down' } },
+  { id: 'asdfKeys', keyMap: { a: 'left', w: 'up', d: 'right', s: 'down' } },
 ]
-const BASIC_GAME_OPTIONS = { width: 25, height: 25, tickInterval: 100, foodAmount: 4, keyboardProfile: KEYBOARD_PROFILES[0] }
+const BASIC_GAME_OPTIONS = { boardSize: 25, tickInterval: 100, foodAmount: 4, inputControls: INPUT_CONTROLS_PROFILES[0] }
 
 function generateNewGame(options) {
-  let game = {
+  const snake = {
+    head: { x: 12, y: 12 },
+    body: [{ x: 11, y: 12 }, { x: 10, y: 12 }, { x: 9, y: 12 }, { x: 8, y: 12 }],
+    velocity: { x: 1, y: 0 },
+    inputControls: options.inputControls,
+    alive: true
+  }
+  return {
     options: options,
-    board: {
-      width: options.width,
-      height: options.height,
-    },
+    boardSize: options.boardSize,
     tickInterval: options.tickInterval,
+    started: false,
     paused: true,
     over: false,
-    foods: [],
+    foods: getRandomEmptyPositions(options.boardSize, [snake.head, ...snake.body], options.foodAmount),
     foodAmount: options.foodAmount,
-    snake: {
-      head: { x: 12, y: 12 },
-      body: [{ x: 11, y: 12 }, { x: 10, y: 12 }, { x: 9, y: 12 }, { x: 8, y: 12 }],
-      velocity: { x: 1, y: 0 },
-      keyboardProfile: options.keyboardProfile,
-      alive: true
-    },
+    snake: snake,
   }
-  game.foods = Array(game.foodAmount).fill()
-    .map(() => getRandomEmptyPosition(game.board, [game.snake.head, ...game.snake.body]))
-  return game
 }
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-function isSamePosition(a, b) {
-  return a.x === b.x && a.y === b.y
-}
-
 function isTakenPosition(position, takenPositions) {
-  return takenPositions.find(takenPosition => isSamePosition(takenPosition, position))
+  return takenPositions.find(takenPosition => _.isEqual(takenPosition, position))
 }
 
-function getRandomPosition(board) {
-  return { x: getRandomInt(0, board.width - 1), y: getRandomInt(0, board.height - 1) }
+function getRandomPosition(boardSize) {
+  return { x: getRandomInt(0, boardSize - 1), y: getRandomInt(0, boardSize - 1) }
 }
 
-function getRandomEmptyPosition(board, takenPositions = []) {
-  let position
-  do {
-    position = getRandomPosition(board)
-  } while (isTakenPosition(position, takenPositions))
-  return position
+function getRandomEmptyPositions(boardSize, takenPositions = [], amount = 1) {
+  let tempTakenPositions = [...takenPositions]
+  let positions = []
+  for (let i = 0; i < amount; i++) {
+    let position
+    do {
+      position = getRandomPosition(boardSize)
+    } while (isTakenPosition(position, tempTakenPositions))
+    tempTakenPositions.push(position)
+    positions.push(position)
+  }
+  return positions
 }
 
 function App() {
-  const [game, setGame] = useState(generateNewGame(BASIC_GAME_OPTIONS))
+  const [gameOptions, setGameOptions] = useState(BASIC_GAME_OPTIONS)
+  const [game, setGame] = useState(generateNewGame(gameOptions))
+  const [optionsDialogIsOpen, setOptionsDialogIsOpen] = useState(false)
+
+  const resetGameOptions = () => setGameOptions(BASIC_GAME_OPTIONS)
+  const toggleOptionsDialog = () => setOptionsDialogIsOpen(isOpen => !isOpen)
+  const restartGame = () => { setGame(generateNewGame(gameOptions)) && setOptionsDialogIsOpen(false) }
+  const pauseGame = () => setGame(game => ({ ...game, paused: !game.paused }))
+  const setGameOption = (option, value) => setGameOptions(options => ({ ...options, [option]: value }))
+
+  const buttonClassNames = "bg-gray-300 rounded-md px-2 py-1 m-1 transition-colors hover:bg-gray-200 focus:bg-gray-200 outline-none focus:ring-1 focus:ring-gray-800 z-10"
+
   return (
     <div className="App">
       <header className="App-header">
         <h2 className="text-3xl">Snake Game</h2>
       </header>
-      {game && <Game
-        game={game}
-        setGame={setGame}
-        getRandomEmptyPosition={getRandomEmptyPosition}
-        restart={() => setGame(generateNewGame(game.options))}
-      />}
+      <div className="inline-layered">
+
+        {game.over && <div className="self-center z-10 h-full backdrop-filter backdrop-blur-sm">
+          <h3 className="m-4 mt-10 text-4xl font-semibold">GAME OVER</h3>
+          <div className="m-4">
+            {!_.isEqual(gameOptions, BASIC_GAME_OPTIONS) && optionsDialogIsOpen &&
+              <button className={buttonClassNames} onClick={resetGameOptions}>Reset</button>
+            }
+            <button className={buttonClassNames} onClick={toggleOptionsDialog}>Options</button>
+            <button className={buttonClassNames + ' text-green-900 bg-green-200 hover:bg-green-100'}
+              onClick={restartGame}>Start Game</button>
+          </div>
+          {optionsDialogIsOpen && <GameOptionsDialog
+            gameOptions={gameOptions}
+            setGameOption={setGameOption}
+            inputControlsProfiles={INPUT_CONTROLS_PROFILES}
+          />}
+        </div>}
+
+        {game.paused && !game.over && game.started && <div className="self-center z-10 h-full">
+          <h3 className="m-3 text-4xl font-semibold">PAUSED</h3>
+          <button className={buttonClassNames + ' text-4xl opacity-60 px-4 py-2'} onClick={pauseGame}>
+            Pause/Resume (p)
+          </button>
+        </div>}
+
+        {game && <Game
+          game={game}
+          setGame={setGame}
+          getRandomEmptyPositions={getRandomEmptyPositions}
+          restart={restartGame}
+        />}
+      </div>
+
     </div>
   )
 }

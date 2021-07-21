@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react'
+import _ from 'lodash'
 import KeyboardEventHandler from 'react-keyboard-event-handler'
 
 const VELOCITIES = {
@@ -8,9 +9,9 @@ const VELOCITIES = {
   down: { x: 0, y: 1 },
 }
 
-function Game({ game, setGame, getRandomEmptyPosition, restart }) {
+function Game({ game, setGame, getRandomEmptyPositions, restart }) {
   const board = useMemo(() => {
-    const board = Array(game.board.height).fill().map(() => Array(game.board.width).fill({}))
+    const board = Array(game.boardSize).fill().map(() => Array(game.boardSize).fill({}))
     const { snake, foods } = game
     board[snake.head.y][snake.head.x] = { snake: true, head: true, alive: snake.alive }
     for (const food of foods) {
@@ -23,11 +24,11 @@ function Game({ game, setGame, getRandomEmptyPosition, restart }) {
   }, [game])
   const inputKeys = useMemo(() => {
     return [
-      ...Object.keys(game.snake.keyboardProfile),
+      ...Object.keys(game.snake.inputControls.keyMap),
       'p',
       'enter'
     ].map(key => [key, 'ctrl+' + key, 'shift+' + key, 'meta+' + key, 'alt+' + key]).flat()
-  }, [game.snake.keyboardProfile])
+  }, [game.snake.inputControls.keyMap])
 
   // moves snakes to next position each game tick
   useEffect(() => {
@@ -54,9 +55,9 @@ function Game({ game, setGame, getRandomEmptyPosition, restart }) {
 
         // kill if crashing into wall
         if (nextSnake.head.x < 0
-          || nextSnake.head.x >= game.board.width
+          || nextSnake.head.x >= game.boardSize
           || nextSnake.head.y < 0
-          || nextSnake.head.y >= game.board.height
+          || nextSnake.head.y >= game.boardSize
         ) {
           return { ...game, over: true, snake: { ...snake, alive: false } }
         }
@@ -68,8 +69,8 @@ function Game({ game, setGame, getRandomEmptyPosition, restart }) {
               ...game,
               snake: { ...nextSnake, body: [snake.head, ...snake.body] },
               foods: [
-                ...foods.filter(f => nextSnake.head.x !== f.x || nextSnake.head.y !== f.y),
-                getRandomEmptyPosition(game.board, [snake.head, ...snake.body, ...foods])
+                ...foods.filter(food => !_.isEqual(food, nextSnake.head)),
+                getRandomEmptyPositions(game.boardSize, [snake.head, ...snake.body, ...foods])[0]
               ]
             }
           }
@@ -80,7 +81,7 @@ function Game({ game, setGame, getRandomEmptyPosition, restart }) {
       })
     }, game.tickInterval)
     return () => { clearInterval(interval) }
-  }, [game.tickInterval, game.paused, game.over, getRandomEmptyPosition, setGame])
+  }, [game.tickInterval, game.paused, game.over, getRandomEmptyPositions, setGame])
 
   const handleKeyDown = (key, e) => {
     const plainKey = key.split('+').pop()
@@ -94,25 +95,27 @@ function Game({ game, setGame, getRandomEmptyPosition, restart }) {
       }
       // pause
       if (plainKey === 'p') {
-        return { ...game, paused: !game.paused }
+        return { ...game, paused: !game.paused, started: true }
       }
       // move
-      if (snake.keyboardProfile[plainKey]) {
-        const velocity = VELOCITIES[snake.keyboardProfile[plainKey]]
+      if (snake.inputControls.keyMap[plainKey]) {
+        const velocity = VELOCITIES[snake.inputControls.keyMap[plainKey]]
         if (!velocity
           || Math.abs((snake.head.x - snake.body[0].x) - velocity.x) > 1
-          || Math.abs((snake.head.y - snake.body[0].y) - velocity.y) > 1) {
+          || Math.abs((snake.head.y - snake.body[0].y) - velocity.y) > 1
+          || (game.paused && game.started)) {
           return game
         }
-        return { ...game, snake: { ...snake, velocity }, paused: false }
+        return { ...game, snake: { ...snake, velocity }, paused: false, started: true }
       }
     })
   }
 
+  // tailwind jit use: grid-cols-25, grid-cols-25, grid-cols-25
   return (
-    <div className="game inline-block" onKeyDown={handleKeyDown}>
+    <div className="game" onKeyDown={handleKeyDown}>
       <KeyboardEventHandler handleKeys={inputKeys} onKeyEvent={handleKeyDown} />
-      <div className="grid grid-cols-25 grid-flow-row bg-gray-900">
+      <div className={`grid grid-cols-${game.boardSize} grid-flow-row bg-gray-900` + ((game.paused && game.started) || game.over ? ' opacity-40' : '')} >
         {board && board.map((row, y) => row.map((cell, x) => {
           return (
             <div

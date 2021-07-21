@@ -1,3 +1,22 @@
 .App {
   text-align: center;
 }
+
+/* https://stackoverflow.com/a/62272390/3458162 */
+.layered {
+  display: grid;
+}
+
+.layered > * {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
+
+.inline-layered {
+  display: inline-grid;
+}
+
+.inline-layered > * {
+  grid-column-start: 1;
+  grid-row-start: 1;
+}
