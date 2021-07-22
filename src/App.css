@@ -1,6 +1,3 @@
-.App {
-  text-align: center;
-}
 
 /* https://stackoverflow.com/a/62272390/3458162 */
 .layered {
@@ -20,3 +17,4 @@
   grid-column-start: 1;
   grid-row-start: 1;
 }
+/* end https://stackoverflow.com/a/62272390/3458162 */

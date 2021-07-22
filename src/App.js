@@ -9,7 +9,7 @@ const INPUT_CONTROLS_PROFILES = [
   { id: 'arrowKeys', keyMap: { left: 'left', up: 'up', right: 'right', down: 'down' } },
   { id: 'asdfKeys', keyMap: { a: 'left', w: 'up', d: 'right', s: 'down' } },
 ]
-const BASIC_GAME_OPTIONS = { boardSize: 25, tickInterval: 100, foodAmount: 4, inputControls: INPUT_CONTROLS_PROFILES[0] }
+const BASIC_GAME_OPTIONS = { boardSize: 25, speed: 165, foodAmount: 4, inputControls: INPUT_CONTROLS_PROFILES[0] }
 
 function generateNewGame(options) {
   const snake = {
@@ -22,7 +22,7 @@ function generateNewGame(options) {
   return {
     options: options,
     boardSize: options.boardSize,
-    tickInterval: options.tickInterval,
+    speed: options.speed,
     started: false,
     paused: true,
     over: false,
@@ -71,7 +71,7 @@ function App() {
   const buttonClassNames = "bg-gray-300 rounded-md px-2 py-1 m-1 transition-colors hover:bg-gray-200 focus:bg-gray-200 outline-none focus:ring-1 focus:ring-gray-800 z-10"
 
   return (
-    <div className="App">
+    <div className="App text-center">
       <header className="App-header">
         <h2 className="text-3xl">Snake Game</h2>
       </header>

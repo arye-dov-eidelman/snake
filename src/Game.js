@@ -79,9 +79,9 @@ function Game({ game, setGame, getRandomEmptyPositions, restart }) {
         // move to next cell
         return { ...game, snake: nextSnake }
       })
-    }, game.tickInterval)
+    }, game.speed)
     return () => { clearInterval(interval) }
-  }, [game.tickInterval, game.paused, game.over, getRandomEmptyPositions, setGame])
+  }, [game.speed, game.paused, game.over, getRandomEmptyPositions, setGame])
 
   const handleKeyDown = (key, e) => {
     const plainKey = key.split('+').pop()
@@ -111,7 +111,7 @@ function Game({ game, setGame, getRandomEmptyPositions, restart }) {
     })
   }
 
-  // tailwind jit use: grid-cols-25, grid-cols-25, grid-cols-25
+  // tailwind jit use: grid-cols-16, grid-cols-25, grid-cols-50
   return (
     <div className="game" onKeyDown={handleKeyDown}>
       <KeyboardEventHandler handleKeys={inputKeys} onKeyEvent={handleKeyDown} />
