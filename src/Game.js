@@ -111,7 +111,7 @@ function Game({ game, setGame, getRandomEmptyPositions, restart }) {
     })
   }
 
-  // tailwind jit use: grid-cols-16, grid-cols-25, grid-cols-50
+  // tailwind keep: grid-cols-16 grid-cols-25 grid-cols-50
   return (
     <div className="game" onKeyDown={handleKeyDown}>
       <KeyboardEventHandler handleKeys={inputKeys} onKeyEvent={handleKeyDown} />
