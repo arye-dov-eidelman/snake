@@ -59,8 +59,8 @@ function getRandomEmptyPositions(boardSize, takenPositions = [], amount = 1) {
 
 function App() {
   const [gameOptions, setGameOptions] = useState(BASIC_GAME_OPTIONS)
-  const [game, setGame] = useState(generateNewGame(gameOptions))
-  const [optionsDialogIsOpen, setOptionsDialogIsOpen] = useState(false)
+  const [game, setGame] = useState()
+  const [optionsDialogIsOpen, setOptionsDialogIsOpen] = useState(true)
 
   const resetGameOptions = () => setGameOptions(BASIC_GAME_OPTIONS)
   const toggleOptionsDialog = () => setOptionsDialogIsOpen(isOpen => !isOpen)
@@ -71,14 +71,13 @@ function App() {
   const buttonClassNames = "bg-gray-300 rounded-md px-2 py-1 m-1 transition-colors hover:bg-gray-200 focus:bg-gray-200 outline-none focus:ring-1 focus:ring-gray-800 z-10"
 
   return (
-    <div className="App text-center">
-      <header className="App-header">
-        <h2 className="text-3xl">Snake Game</h2>
-      </header>
-      <div className="inline-layered">
+    <div className="App text-center h-full overflow-hidden">
+      <div className="inline-layered h-full w-full lanscape:w-96">
 
-        {game.over && <div className="self-center z-10 h-full backdrop-filter backdrop-blur-sm">
-          <h3 className="m-4 mt-10 text-4xl font-semibold">GAME OVER</h3>
+        {(!game || game.over) && <div className="self-center z-10 h-full w-full backdrop-filter backdrop-blur-sm">
+          <h3 className="m-4 mt-10 text-4xl font-semibold">
+            {game && game.over ? "GAME OVER" : "SNAKE GAME"}
+          </h3>
           <div className="m-4">
             {!_.isEqual(gameOptions, BASIC_GAME_OPTIONS) && optionsDialogIsOpen &&
               <button className={buttonClassNames} onClick={resetGameOptions}>Reset</button>
@@ -94,7 +93,7 @@ function App() {
           />}
         </div>}
 
-        {game.paused && !game.over && game.started && <div className="self-center z-10 h-full">
+        {game && game.paused && !game.over && game.started && <div className="self-center z-10 h-full">
           <h3 className="m-3 text-4xl font-semibold">PAUSED</h3>
           <button className={buttonClassNames + ' text-4xl opacity-60 px-4 py-2'} onClick={pauseGame}>
             Pause/Resume (p)

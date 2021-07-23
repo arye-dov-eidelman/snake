@@ -115,24 +115,23 @@ function Game({ game, setGame, getRandomEmptyPositions, restart }) {
   return (
     <div className="game" onKeyDown={handleKeyDown}>
       <KeyboardEventHandler handleKeys={inputKeys} onKeyEvent={handleKeyDown} />
-      <div className={`grid grid-cols-${game.boardSize} grid-flow-row bg-gray-900` + ((game.paused && game.started) || game.over ? ' opacity-40' : '')} >
+      <div style={{ width: "100vmin", height: "100vmin" }} className={`mx-auto grid grid-cols-${game.boardSize} grid-flow-row bg-gray-900` + ((game.paused && game.started) || game.over ? ' opacity-40' : '')} >
         {board && board.map((row, y) => row.map((cell, x) => {
-          return (
-            <div
-              key={`${x}-${y}`}
-              className={
-                'w-4 h-4 border-2 border-gray-500 border-opacity-25 ' +
-                (cell.food ? 'bg-yellow-300'
-                  : cell.snake
-                    ? (cell.alive
-                      ? 'border-red-900 ' + (cell.body ? 'bg-red-400 ' : cell.head ? 'bg-red-600 ' : '')
-                      : 'border-gray-900 ' + (cell.body ? 'bg-gray-400 ' : cell.head ? 'bg-gray-600 ' : '')
-                    ) : ''
-                )
-
-              }>
-            </div>
-          )
+          let className
+          if (cell.food) {
+            className = "border-gray-500 bg-yellow-300"
+          } else if (cell.snake && cell.alive && cell.body) {
+            className = "border-red-900 bg-red-400"
+          } else if (cell.snake && cell.alive && cell.head) {
+            className = "border-red-900 bg-red-600"
+          } else if (cell.snake && !cell.alive && cell.body) {
+            className = "border-gray-900 bg-gray-400"
+          } else if (cell.snake && !cell.alive && cell.head) {
+            className = "border-gray-900 bg-gray-600"
+          } else {
+            className = "border-gray-700 bg-gray-900"
+          }
+          return <div key={`${x}-${y}`} className={"border-2 border-opacity-25 " + className}></div>
         }))}
       </div>
     </div>
