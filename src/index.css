@@ -16,3 +16,12 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+@layer components {
+  .nipple .back {
+    @apply bg-purple-800 !important;
+  }
+  .nipple .front {
+    @apply bg-purple-400 !important;
+  }
+}

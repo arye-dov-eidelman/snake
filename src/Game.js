@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import _ from 'lodash'
-import KeyboardEventHandler from 'react-keyboard-event-handler'
+import InputControls from './InputControls'
 
 const VELOCITIES = {
   left: { x: -1, y: 0 },
@@ -22,13 +22,6 @@ function Game({ game, setGame, getRandomEmptyPositions, restart }) {
     }
     return board
   }, [game])
-  const inputKeys = useMemo(() => {
-    return [
-      ...Object.keys(game.snake.inputControls.keyMap),
-      'p',
-      'enter'
-    ].map(key => [key, 'ctrl+' + key, 'shift+' + key, 'meta+' + key, 'alt+' + key]).flat()
-  }, [game.snake.inputControls.keyMap])
 
   // moves snakes to next position each game tick
   useEffect(() => {
@@ -83,38 +76,35 @@ function Game({ game, setGame, getRandomEmptyPositions, restart }) {
     return () => { clearInterval(interval) }
   }, [game.speed, game.paused, game.over, getRandomEmptyPositions, setGame])
 
-  const handleKeyDown = (key, e) => {
-    const plainKey = key.split('+').pop()
-    console.log(key, plainKey, e)
-    setGame(game => {
-      const { snake } = game
-      // new game if over
-      if (plainKey === 'enter') {
-        if (game.over) { restart() }
+  const handleDirectionChange = (direction) => {
+    setGame(({ snake }) => {
+      const velocity = VELOCITIES[direction]
+      if (!velocity
+        || Math.abs((snake.head.x - snake.body[0].x) - velocity.x) > 1
+        || Math.abs((snake.head.y - snake.body[0].y) - velocity.y) > 1
+        || (game.paused && game.started)) {
         return game
       }
-      // pause
-      if (plainKey === 'p') {
-        return { ...game, paused: !game.paused, started: true }
-      }
-      // move
-      if (snake.inputControls.keyMap[plainKey]) {
-        const velocity = VELOCITIES[snake.inputControls.keyMap[plainKey]]
-        if (!velocity
-          || Math.abs((snake.head.x - snake.body[0].x) - velocity.x) > 1
-          || Math.abs((snake.head.y - snake.body[0].y) - velocity.y) > 1
-          || (game.paused && game.started)) {
-          return game
-        }
-        return { ...game, snake: { ...snake, velocity }, paused: false, started: true }
-      }
+      return { ...game, snake: { ...snake, velocity }, paused: false, started: true }
     })
+  }
+
+  const handlePause = () => {
+    setGame(game => ({ ...game, paused: !game.paused, started: true }))
+  }
+  const handleEnter = () => {
+    if (game.over) { restart() }
   }
 
   // tailwind keep: grid-cols-16 grid-cols-25 grid-cols-50
   return (
-    <div className="game" onKeyDown={handleKeyDown}>
-      <KeyboardEventHandler handleKeys={inputKeys} onKeyEvent={handleKeyDown} />
+    <div className="game">
+      <InputControls
+        onDirectionChange={handleDirectionChange}
+        onPause={handlePause}
+        onEnter={handleEnter}
+        keyboardProfile={game.snake.inputControls}
+      />
       <div style={{ width: "100vmin", height: "100vmin" }} className={`mx-auto grid grid-cols-${game.boardSize} grid-flow-row bg-gray-900` + ((game.paused && game.started) || game.over ? ' opacity-40' : '')} >
         {board && board.map((row, y) => row.map((cell, x) => {
           let className
