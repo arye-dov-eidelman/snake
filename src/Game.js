@@ -105,7 +105,7 @@ function Game({ game, setGame, getRandomEmptyPositions, restart }) {
         onEnter={handleEnter}
         keyboardProfile={game.snake.inputControls}
       />
-      <div style={{ width: "100vmin", height: "100vmin" }} className={`mx-auto grid grid-cols-${game.boardSize} grid-flow-row bg-gray-900` + ((game.paused && game.started) || game.over ? ' opacity-40' : '')} >
+      <div className={`w-[100vmin] h-[100vmin] mx-auto grid grid-cols-${game.boardSize} grid-flow-row bg-gray-900` + ((game.paused && game.started) || game.over ? ' opacity-40' : '')} >
         {board && board.map((row, y) => row.map((cell, x) => {
           let className
           if (cell.food) {
