@@ -1,4 +1,5 @@
 module.exports = {
+  jit: true,
   purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   darkMode: false, // or 'media' or 'class'
   theme: {
@@ -10,7 +11,7 @@ module.exports = {
         '50': 'repeat(50, minmax(0, 1fr))',
         '75': 'repeat(25, minmax(0, 1fr))',
         '100': 'repeat(100, minmax(0, 1fr))'
-      },      
+      },
       screens: {
         'portrait': {'raw': '(orientation: portrait)'},
         'lanscape': {'raw': '(orientation: lanscape)'}

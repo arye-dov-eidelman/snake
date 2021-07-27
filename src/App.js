@@ -3,7 +3,6 @@ import _ from 'lodash'
 import './App.css'
 import Game from './Game'
 import GameOptionsDialog from './GameOptionsDialog'
-window._ = _
 
 const INPUT_CONTROLS_PROFILES = [
   { id: 'arrowKeys', keyMap: { left: 'left', up: 'up', right: 'right', down: 'down' } },
