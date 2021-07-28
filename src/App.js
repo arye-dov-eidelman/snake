@@ -11,9 +11,15 @@ const INPUT_CONTROLS_PROFILES = [
 const BASIC_GAME_OPTIONS = { boardSize: 25, speed: 165, foodAmount: 4, inputControls: INPUT_CONTROLS_PROFILES[0] }
 
 function generateNewGame(options) {
+  const center = Math.ceil(options.boardSize / 2)
   const snake = {
-    head: { x: 12, y: 12 },
-    body: [{ x: 11, y: 12 }, { x: 10, y: 12 }, { x: 9, y: 12 }, { x: 8, y: 12 }],
+    head: { x: center - 2, y: center - 1 },
+    body: [
+      { x: center - 3, y: center - 1 },
+      { x: center - 4, y: center - 1 },
+      { x: center - 5, y: center - 1 },
+      { x: center - 6, y: center - 1 },
+    ],
     velocity: { x: 1, y: 0 },
     inputControls: options.inputControls,
     alive: true
