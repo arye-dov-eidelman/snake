@@ -77,11 +77,14 @@ function Game({ game, setGame, getRandomEmptyPositions, restart }) {
   }, [game.speed, game.paused, game.over, getRandomEmptyPositions, setGame])
 
   const handleDirectionChange = (direction) => {
-    setGame(({ snake }) => {
+    setGame(({ snake, started }) => {
       const velocity = VELOCITIES[direction]
+      const xVelocityChange = Math.abs((snake.head.x - snake.body[0].x) - velocity.x)
+      const yVelocityChange = Math.abs((snake.head.y - snake.body[0].y) - velocity.y)
       if (!velocity
-        || Math.abs((snake.head.x - snake.body[0].x) - velocity.x) > 1
-        || Math.abs((snake.head.y - snake.body[0].y) - velocity.y) > 1
+        || xVelocityChange > 1
+        || yVelocityChange > 1
+        || (xVelocityChange === 0 && yVelocityChange === 0 && started)
         || (game.paused && game.started)) {
         return game
       }
@@ -92,9 +95,6 @@ function Game({ game, setGame, getRandomEmptyPositions, restart }) {
   const handlePause = () => {
     setGame(game => ({ ...game, paused: !game.paused, started: true }))
   }
-  const handleEnter = () => {
-    if (game.over) { restart() }
-  }
 
   // tailwind keep: grid-cols-16 grid-cols-25 grid-cols-50
   return (
@@ -102,7 +102,6 @@ function Game({ game, setGame, getRandomEmptyPositions, restart }) {
       <InputControls
         onDirectionChange={handleDirectionChange}
         onPause={handlePause}
-        onEnter={handleEnter}
         keyboardProfile={game.snake.inputControls}
       />
       <div className={`w-[100vmin] h-[100vmin] mx-auto grid grid-cols-${game.boardSize} grid-flow-row bg-gray-900` + ((game.paused && game.started) || game.over ? ' opacity-40' : '')} >

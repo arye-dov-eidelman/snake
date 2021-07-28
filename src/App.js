@@ -63,7 +63,7 @@ function App() {
 
   const resetGameOptions = () => setGameOptions(BASIC_GAME_OPTIONS)
   const toggleOptionsDialog = () => setOptionsDialogIsOpen(isOpen => !isOpen)
-  const restartGame = () => { setGame(generateNewGame(gameOptions)) && setOptionsDialogIsOpen(false) }
+  const startGame = () => { setGame(generateNewGame(gameOptions)) }
   const pauseGame = () => setGame(game => ({ ...game, paused: !game.paused }))
   const setGameOption = (option, value) => setGameOptions(options => ({ ...options, [option]: value }))
 
@@ -83,7 +83,7 @@ function App() {
             }
             <button className={buttonClassNames} onClick={toggleOptionsDialog}>Options</button>
             <button className={buttonClassNames + ' text-green-900 bg-green-200 hover:bg-green-100'}
-              onClick={restartGame}>Start Game</button>
+              onClick={startGame}>Start Game</button>
           </div>
           {optionsDialogIsOpen && <GameOptionsDialog
             gameOptions={gameOptions}
@@ -103,7 +103,6 @@ function App() {
           game={game}
           setGame={setGame}
           getRandomEmptyPositions={getRandomEmptyPositions}
-          restart={restartGame}
         />}
       </div>
 
